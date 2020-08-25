@@ -1,0 +1,191 @@
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Configuration;
+using PrModel.Account;
+using System.Data;
+using PrModel.Manage;
+
+namespace PrDbcontext.Account
+{
+    public class AccountRepository
+    {
+        SqlConnection con = null;
+        public void connection()
+        {
+            string strcon = ConfigurationManager.ConnectionStrings["PrDbconnection"].ToString();
+            con = new SqlConnection(strcon);
+        }
+        public List<PrUser> GetUsers()
+        {
+            connection();
+            List<PrUser> ObjUser = new List<PrUser>();
+            //string sqlquery = "Select * from UserMaster";
+            SqlCommand cmd = new SqlCommand("Usp_GetAllUser", con);
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter sdr = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sdr.Fill(dt);
+            foreach (DataRow dr in dt.Rows)
+            {
+                ObjUser.Add(new PrUser
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+                    Username = Convert.ToString(dr["Username"]),
+                    Password = Convert.ToString(dr["Password"]),
+                    Email = Convert.ToString(dr["Email"]),
+                    Birthdate = Convert.ToDateTime(dr["Birthdate"]),
+                    Department = Convert.ToString(dr["Department"]),
+                    Address = Convert.ToString(dr["Address"]),
+                    Cityname = Convert.ToString(dr["Cityname"]),
+                    State = Convert.ToString(dr["State"]),
+                    Gender = Convert.ToString(dr["Gender"]),
+                    Sallary = Convert.ToInt32(dr["Sallary"]),
+                    IsActive = Convert.ToBoolean(dr["IsActive"])
+                });
+            }
+            return ObjUser;
+        }
+
+        public bool InsertUser(PrUser objuser)
+        {
+            connection();
+            SqlCommand cmd = new SqlCommand("Usp_SaveUserDetails", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Username", objuser.Username);
+            cmd.Parameters.AddWithValue("@Password", objuser.Password);
+            cmd.Parameters.AddWithValue("@Email", objuser.Email);
+            cmd.Parameters.AddWithValue("@Birthdate", objuser.Birthdate);
+            cmd.Parameters.AddWithValue("@DeptId", objuser.Department);
+            cmd.Parameters.AddWithValue("@Address", objuser.Address);
+            cmd.Parameters.AddWithValue("@CityId", objuser.Cityname);
+            cmd.Parameters.AddWithValue("@StateId", objuser.State);
+            cmd.Parameters.AddWithValue("@Gender", objuser.Gender);
+            cmd.Parameters.AddWithValue("@Sallary", objuser.Sallary);
+            cmd.Parameters.AddWithValue("@IsActive", objuser.IsActive);
+            con.Open();
+            int i = cmd.ExecuteNonQuery();
+            con.Close();
+
+            if (i >= 1)
+                return true;
+            else
+                return false;
+        }
+
+        public bool UpdateUser(PrUser objuser)
+        {
+            connection();
+            SqlCommand cmd = new SqlCommand("Usp_Update_UserDetail", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Id", objuser.Id);
+            cmd.Parameters.AddWithValue("@Username", objuser.Username);
+            cmd.Parameters.AddWithValue("@Password", objuser.Password);
+            cmd.Parameters.AddWithValue("@Email", objuser.Email);
+            cmd.Parameters.AddWithValue("@Birthdate", objuser.Birthdate);
+            cmd.Parameters.AddWithValue("@DeptId", objuser.Department);
+            cmd.Parameters.AddWithValue("@Address", objuser.Address);
+            cmd.Parameters.AddWithValue("@CityId", objuser.Cityname);
+            cmd.Parameters.AddWithValue("@StateId", objuser.State);
+            cmd.Parameters.AddWithValue("@Gender", objuser.Gender);
+            cmd.Parameters.AddWithValue("@Sallary", objuser.Sallary);
+            cmd.Parameters.AddWithValue("@IsActive", objuser.IsActive);
+            con.Open();
+            int i = cmd.ExecuteNonQuery();
+            con.Close();
+            if (i <= 1)
+                return true;
+            else
+                return false;
+        }
+        
+        public bool DeleteUser(int id)
+        {
+            connection();
+            string sqlquery = "Delete from UserMaster where Id=@Id";
+            SqlCommand cmd = new SqlCommand(sqlquery, con);
+            cmd.CommandType = CommandType.Text;
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            int i = cmd.ExecuteNonQuery();
+            con.Close();
+
+            if (i >= 1)
+                return true;
+            else
+                return false;
+        }
+        #region DropDown fills
+        public List<PrDepartment> Getdepartment()
+        {
+            connection();
+            List<PrDepartment> objDepartment = new List<PrDepartment>();
+            string sqlquery = "Select  Id,Department from DepartmentMaster";
+            SqlCommand cmd = new SqlCommand(sqlquery, con);
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter sdr = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sdr.Fill(dt);
+            foreach (DataRow dr in dt.Rows)
+            {
+                objDepartment.Add(new PrDepartment
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+
+                    Department = Convert.ToString(dr["Department"])
+                });
+            }
+            return objDepartment;
+        }
+        public List<PrState> GetState()
+        {
+            connection();
+            List<PrState> objstate = new List<PrState>();
+            string sqlquery = "Select  Id,State from StateMaster";
+            SqlCommand cmd = new SqlCommand(sqlquery, con);
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter sdr = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sdr.Fill(dt);
+            foreach (DataRow dr in dt.Rows)
+            {
+                objstate.Add(new PrState
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+
+                    State = Convert.ToString(dr["State"])
+                });
+            }
+            return objstate;
+        }
+        public List<PrCity> GetCity()
+        {
+            connection();
+            List<PrCity> objcity = new List<PrCity>();
+            string sqlquery = "Select  Id,Cityname from CityMaster";
+            SqlCommand cmd = new SqlCommand(sqlquery, con);
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter sdr = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sdr.Fill(dt);
+            foreach (DataRow dr in dt.Rows)
+            {
+                objcity.Add(new PrCity
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+
+                    Cityname = Convert.ToString(dr["Cityname"])
+                });
+            }
+            return objcity;
+        }
+        #endregion
+    }
+}
